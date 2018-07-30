@@ -1,0 +1,119 @@
+#AWS service name 
+service: serverless-aws-boilerplate
+
+frameworkVersion: ">=1.0.0 <2.0.0"
+# serverless provider configuration
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: ${opt:stage, file(config.json):stage, 'dev'}
+  region: ${opt:region, file(config.json):region, 'us-east-1'}
+  versionFunctions: false
+  ignore_certs: true
+  memorySize: 1024
+  timeout: 10
+  cfLogs: true
+  deploymentBucket:
+    serverSideEncryption: AES256
+  stackTags:
+    environment: ${opt:stage, file(config.json):stage, 'test'}
+    serviceName: serverless-aws-boilerplate
+  environment:
+    stage: ${opt:stage, file(config.json):stage, 'test'}
+    region: ${opt:region, file(config.json):region, 'us-east-1'}
+    dynamodbEndpoint: 'https://dynamodb.us-east-1.amazonaws.com'
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - xray:*
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:BatchGetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:DescribeTable
+        - dynamodb:CreateTable
+      Resource: "*"
+    - Effect: Deny
+      Action:
+        - dynamodb:DeleteTable
+        - dynamodb:DeleteItem
+      Resource: "*"
+
+#List of packages to include or exclude
+package:
+  exclude:
+    - ./node_modules/**
+    - ./__test__/**/**
+    - ./.eslintrc
+    - ./.editorconfig
+    - ./.eslintignore
+    - ./.gitignore
+    - ./.prettierrc
+    - ./config/*
+    - ./jest-config.json
+  include:
+    #All files to be included from root goes here
+    - ./src/**
+    - ./common/**
+    - ./aws/**
+    - ./handlers/**
+    - ./data/**
+
+
+#List all plugins or dependancies
+plugins:
+  - serverless-prune-plugin
+  - serverless-webpack
+  - serverless-plugin-scripts
+  - serverless-dynamodb-local
+  - serverless-offline
+  - serverless-domain-manager
+  - serverless-jest-plugin
+
+custom:
+  prune:
+    automatic: true
+    number: 3
+  jest:
+    collectCoverage: true
+    verbose: true
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+  serverless-offline:
+    port: 4000
+  #customDomain:
+    #domainName: Domain Name goes here
+    #basePath: 'dev'
+    #stage: ${opt:stage, file(config.json):stage, 'test'}
+    #createRoute53Record: true
+    #certificateName: Certificate Name Goes here
+    #endpointType: 'edge'
+
+# serverless lambda function and aws component triggers
+functions:
+  createUser:
+    handler: handlers/handler.helloWorldOne
+    events:
+      - http:
+          path: /user/helloWorldOne
+          method: GET
+          cors: true
+  createUserPreference:
+    handler: handlers/handler.helloWorldTwo
+    events:
+      - http:
+          path: /user/helloWorldTwo
+          method: GET
+          cors: true
+  getUserPreference:
+    handler: handlers/handler.helloWorldThree
+    events:
+      - http:
+          path: /user/helloWorldThree
+          method: GET
+          cors: true
+  
