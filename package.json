@@ -20,7 +20,7 @@
         "lint": "eslint .",
         "install-modules": "npm install && sls dynamodb install",
         "create-tables": "node ./aws/ddb-schema.js",
-        "remove": "sls remove",
+        "remove": "sls remove"
     },
     "author": "Balu Pillai",
     "license": "MIT",
